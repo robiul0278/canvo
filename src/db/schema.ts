@@ -1,4 +1,32 @@
-import { pgTable, uuid, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  pgEnum,
+  uuid,
+  text,
+  timestamp,
+  boolean,
+  integer,
+  index,
+} from "drizzle-orm/pg-core";
+
+export const orderStatusEnum = pgEnum("order_status", [
+  "pending",
+  "confirmed",
+  "processing",
+  "shipped",
+  "delivered",
+  "cancelled",
+]);
+
+export const paymentStatusEnum = pgEnum("payment_status", [
+  "pending",
+  "awaiting_payment",
+  "paid",
+  "failed",
+  "refunded",
+]);
+
+export const paymentMethodEnum = pgEnum("payment_method", ["cod", "bkash"]);
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -69,7 +97,9 @@ export const products = pgTable("products", {
   stockQuantity: integer("stock_quantity").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => [
+  index("products_category_id_idx").on(table.categoryId),
+]);
 
 export const productImages = pgTable("product_images", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -78,4 +108,47 @@ export const productImages = pgTable("product_images", {
   altText: text("alt_text"),
   sortOrder: integer("sort_order").default(0).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => [
+  index("product_images_product_id_idx").on(table.productId),
+]);
+
+export const orders = pgTable("orders", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orderNumber: text("order_number").notNull().unique(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "restrict" }),
+  paymentMethod: paymentMethodEnum("payment_method").notNull(),
+  paymentStatus: paymentStatusEnum("payment_status").default("pending").notNull(),
+  status: orderStatusEnum("status").default("pending").notNull(),
+  subtotalCents: integer("subtotal_cents").notNull(),
+  shippingCents: integer("shipping_cents").notNull(),
+  totalCents: integer("total_cents").notNull(),
+  customerName: text("customer_name").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  customerPhone: text("customer_phone").notNull(),
+  shippingAddress: text("shipping_address").notNull(),
+  shippingCity: text("shipping_city").notNull(),
+  shippingPostalCode: text("shipping_postal_code"),
+  notes: text("notes"),
+  bkashNumber: text("bkash_number"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => [
+  index("orders_user_id_created_at_idx").on(table.userId, table.createdAt),
+  index("orders_customer_email_idx").on(table.customerEmail),
+  index("orders_created_at_idx").on(table.createdAt),
+]);
+
+export const orderItems = pgTable("order_items", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  orderId: uuid("order_id").notNull().references(() => orders.id, { onDelete: "cascade" }),
+  productId: uuid("product_id").references(() => products.id, { onDelete: "set null" }),
+  productName: text("product_name").notNull(),
+  productSlug: text("product_slug").notNull(),
+  imageUrl: text("image_url"),
+  size: text("size"),
+  unitPriceCents: integer("unit_price_cents").notNull(),
+  quantity: integer("quantity").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("order_items_order_id_idx").on(table.orderId),
+]);

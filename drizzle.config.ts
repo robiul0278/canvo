@@ -1,4 +1,7 @@
+import { neonConfig } from "@neondatabase/serverless";
 import { defineConfig } from "drizzle-kit";
+
+neonConfig.webSocketConstructor = globalThis.WebSocket;
 
 export default defineConfig({
   schema: "./src/db/schema.ts",

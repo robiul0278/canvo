@@ -15,6 +15,20 @@
       "when": 1792866246839,
       "tag": "0001_mature_richard_fisk",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793289628361,
+      "tag": "0002_minor_proudstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795278106893,
+      "tag": "0003_smiling_oracle",
+      "breakpoints": true
     }
   ]
 }
