@@ -28,6 +28,7 @@ Canvo is an e-commerce storefront built on Next.js 16 (App Router, Turbopack). C
 - Migration `0003_smiling_oracle.sql` applied to Neon.
 - Order page owner-only; checkout prefilled from session; order success redirects without `?email=`.
 - `npm run lint` and `npm run build` both pass cleanly (21 pages; `/account`, `/checkout`, `/orders/[orderNumber]` dynamic; `/login`, `/register` static).
+- Committed: `841e2c2` "feat: require login to place orders; protect checkout via proxy" (18 files).
 
 ## What Is Next
 - Verify end-to-end flows manually (login → checkout → order → order page; access control for other users).
